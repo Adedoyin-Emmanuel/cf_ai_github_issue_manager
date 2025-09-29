@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cloudflare AI Assistant",
+  title: "GitHub Issue Analyzer",
   description:
-    "AI-powered assistant for managing your Cloudflare configuration, firewall rules, and DNS settings.",
+    "AI-powered analysis of GitHub repository issues with intelligent categorization and priority assessment.",
 };
 
 export default function RootLayout({
