@@ -1,21 +1,22 @@
 "use client";
 
+import { Send, Bot } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+
+import { Input } from "@/components/ui/input";
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
 } from "@/components/ai-elements/conversation";
+import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ai-elements/response";
 import { Message, MessageContent } from "@/components/ai-elements/message";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Send, Bot } from "lucide-react";
 
 interface ChatMessage {
   id: string;
-  role: "user" | "assistant";
   content: string;
+  role: "user" | "assistant";
 }
 
 export default function Chat() {
@@ -24,7 +25,6 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input on mount
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -81,7 +81,6 @@ export default function Chat() {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      // Focus the input after the response is received
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);

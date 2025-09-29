@@ -3,16 +3,16 @@
 import { useState, useEffect } from "react";
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
+  DialogHeader,
+  DialogContent,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCredentials } from "@/hooks/use-credentials";
 
 export default function CredentialsModal() {
-  const { apiToken, zoneId, setCredentials, hasCredentials } = useCredentials();
+  const { setCredentials, hasCredentials } = useCredentials();
   const [open, setOpen] = useState(false);
   const [localApiToken, setLocalApiToken] = useState("");
   const [localZoneId, setLocalZoneId] = useState("");

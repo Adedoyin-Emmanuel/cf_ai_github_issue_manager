@@ -1,10 +1,11 @@
 "use client";
 
-import { useCredentials } from "@/hooks/use-credentials";
-import CredentialsModal from "@/components/credentials-modal";
+import { LogOut, Settings } from "lucide-react";
+
 import Chat from "@/app/components/chat";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings } from "lucide-react";
+import { useCredentials } from "@/hooks/use-credentials";
+import CredentialsModal from "@/components/credentials-modal";
 
 export default function Home() {
   const { isConfigured, clearCredentials } = useCredentials();
