@@ -1,7 +1,7 @@
 "use client";
 
 import { useCredentials } from "@/hooks/use-credentials";
-import CredentialsModal from "@/app/components/credentials-modal";
+import CredentialsModal from "@/components/credentials-modal";
 import Chat from "@/app/components/chat";
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings } from "lucide-react";
@@ -45,7 +45,7 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {isConfigured ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-[calc(100vh-8rem)] sm:h-[calc(100vh-12rem)]">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 h-[calc(100vh-8rem)] sm:h-[calc(100vh-12rem)] flex flex-col">
             <Chat />
           </div>
         ) : (
@@ -60,7 +60,7 @@ export default function Home() {
                 modal should appear automatically.
               </p>
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500">
-                If the modal didn't appear, please refresh the page.
+                If the modal didn&apos;t appear, please refresh the page.
               </p>
             </div>
           </div>

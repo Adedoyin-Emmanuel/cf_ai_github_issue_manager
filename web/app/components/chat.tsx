@@ -1,6 +1,6 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
+import { useState, useRef, useEffect } from "react";
 import {
   Conversation,
   ConversationContent,
@@ -10,103 +10,144 @@ import { Response } from "@/components/ai-elements/response";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot } from "lucide-react";
+
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: "/api/query",
-    });
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input.trim(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get response");
+      }
+
+      const data = await response.text();
+
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: data,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Sorry, I encountered an error. Please try again.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+      // Focus the input after the response is received
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  };
 
   return (
-    <div className="flex flex-col h-full max-h-[calc(100vh-2rem)]">
-      <div className="flex-1 min-h-0">
-        <Conversation>
-          <ConversationContent>
-            {messages.length === 0 ? (
-              <ConversationEmptyState
-                title="Welcome to Cloudflare AI Assistant"
-                description="Ask me anything about your Cloudflare configuration or firewall rules."
-                icon={<Bot className="h-8 w-8 text-muted-foreground" />}
-              />
-            ) : (
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={cn(
-                      "flex gap-3 p-3 sm:p-4 rounded-lg",
-                      message.role === "user"
-                        ? "bg-blue-50 dark:bg-blue-950/20 ml-2 sm:ml-8"
-                        : "bg-gray-50 dark:bg-gray-900/50 mr-2 sm:mr-8"
-                    )}
-                  >
-                    <div className="flex-shrink-0">
-                      {message.role === "user" ? (
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                          <User className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
-                        </div>
-                      ) : (
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                          <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
-                        </div>
-                      )}
+    <div className="flex flex-col h-full">
+      <Conversation className="flex-1">
+        <ConversationContent>
+          {messages.length === 0 ? (
+            <ConversationEmptyState
+              title="Welcome to Cloudflare AI Assistant"
+              description="Ask me anything about your Cloudflare configuration or firewall rules."
+              icon={<Bot className="h-8 w-8 text-muted-foreground" />}
+            />
+          ) : (
+            <>
+              {messages.map((message) => (
+                <Message key={message.id} from={message.role}>
+                  <MessageContent variant="contained">
+                    <Response>{message.content}</Response>
+                  </MessageContent>
+                </Message>
+              ))}
+              {isLoading && (
+                <Message from="assistant">
+                  <MessageContent variant="contained">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.1s" }}
+                        />
+                        <div
+                          className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                          style={{ animationDelay: "0.2s" }}
+                        />
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        AI is thinking...
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs sm:text-sm font-medium mb-1">
-                        {message.role === "user" ? "You" : "AI Assistant"}
-                      </div>
-                      <div className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 break-words">
-                        <Response>{message.content}</Response>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="flex gap-3 p-3 sm:p-4 rounded-lg bg-gray-50 dark:bg-gray-900/50 mr-2 sm:mr-8">
-                    <div className="flex-shrink-0">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs sm:text-sm font-medium mb-1">
-                        AI Assistant
-                      </div>
-                      <div className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
-                        <div className="flex items-center gap-1">
-                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce" />
-                          <div
-                            className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0.1s" }}
-                          />
-                          <div
-                            className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0.2s" }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </ConversationContent>
-        </Conversation>
-      </div>
+                  </MessageContent>
+                </Message>
+              )}
+            </>
+          )}
+        </ConversationContent>
+      </Conversation>
 
       <div className="border-t bg-white dark:bg-gray-900 p-3 sm:p-4">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
-            value={input || ""}
+            ref={inputRef}
+            value={input}
             onChange={handleInputChange}
             placeholder="Ask about your Cloudflare configuration..."
             className="flex-1 text-sm sm:text-base"
             disabled={isLoading}
+            autoComplete="off"
           />
           <Button
             type="submit"
-            disabled={isLoading || !input?.trim()}
+            disabled={isLoading || !input.trim()}
             size="sm"
             className="px-3 sm:px-4"
           >

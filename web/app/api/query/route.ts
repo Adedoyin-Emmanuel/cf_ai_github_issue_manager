@@ -14,30 +14,8 @@ export async function POST(request: NextRequest) {
     // Mock AI response for now
     const mockResponse = generateMockResponse(userQuery);
 
-    // Return a streaming response that @ai-sdk/react expects
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      start(controller) {
-        // Send the response in chunks to simulate streaming
-        const chunks = mockResponse.split(' ');
-        let index = 0;
-        
-        const sendChunk = () => {
-          if (index < chunks.length) {
-            const chunk = chunks[index] + (index < chunks.length - 1 ? ' ' : '');
-            controller.enqueue(encoder.encode(chunk));
-            index++;
-            setTimeout(sendChunk, 50); // Small delay to simulate streaming
-          } else {
-            controller.close();
-          }
-        };
-        
-        sendChunk();
-      },
-    });
-
-    return new Response(stream, {
+    // Return a simple text response
+    return new Response(mockResponse, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
       },
