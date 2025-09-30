@@ -55,28 +55,28 @@ POST https://your-worker.your-subdomain.workers.dev/
 
 ```json
 {
-  "repository": {
-    "name": "mastra",
-    "owner": "mastra-ai",
-    "description": "The TypeScript AI agent framework",
-    "stars": 16953,
-    "forks": 1129,
-    "openIssues": 325,
-    "url": "https://github.com/mastra-ai/mastra"
-  },
-  "issues": [
-    {
-      "issue_number": 8087,
-      "title": "chore(deps): update dependency @storybook/react-vite to ^9.1.8",
-      "state": "open",
-      "labels": [],
-      "author": "dane-ai-mastra[bot]",
-      "created_at": "2025-09-22T18:20:03Z",
-      "updated_at": "2025-09-30T00:36:37Z",
-      "body": "This PR contains the following updates...",
-      "url": "https://github.com/mastra-ai/mastra/pull/8087"
-    }
-  ]
+	"repository": {
+		"name": "mastra",
+		"owner": "mastra-ai",
+		"description": "The TypeScript AI agent framework",
+		"stars": 16953,
+		"forks": 1129,
+		"openIssues": 325,
+		"url": "https://github.com/mastra-ai/mastra"
+	},
+	"issues": [
+		{
+			"issue_number": 8087,
+			"title": "chore(deps): update dependency @storybook/react-vite to ^9.1.8",
+			"state": "open",
+			"labels": [],
+			"author": "dane-ai-mastra[bot]",
+			"created_at": "2025-09-22T18:20:03Z",
+			"updated_at": "2025-09-30T00:36:37Z",
+			"body": "This PR contains the following updates...",
+			"url": "https://github.com/mastra-ai/mastra/pull/8087"
+		}
+	]
 }
 ```
 
@@ -86,9 +86,9 @@ POST https://your-worker.your-subdomain.workers.dev/
 
 ```json
 {
-  "success": true,
-  "analysis": "Based on the analysis of the mastra repository...",
-  "timestamp": "2025-09-30T05:30:00.000Z"
+	"success": true,
+	"analysis": "Based on the analysis of the mastra repository...",
+	"timestamp": "2025-09-30T05:30:00.000Z"
 }
 ```
 
@@ -96,9 +96,9 @@ POST https://your-worker.your-subdomain.workers.dev/
 
 ```json
 {
-  "success": false,
-  "error": "Error message describing what went wrong",
-  "timestamp": "2025-09-30T05:30:00.000Z"
+	"success": false,
+	"error": "Error message describing what went wrong",
+	"timestamp": "2025-09-30T05:30:00.000Z"
 }
 ```
 
@@ -131,6 +131,7 @@ npm test
 ```
 
 The tests include:
+
 - CORS handling
 - Request validation
 - Error scenarios
@@ -146,9 +147,9 @@ The tests include:
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENAI_API_KEY` | Your OpenAI API key for GPT-4 access | Yes |
+| Variable         | Description                          | Required |
+| ---------------- | ------------------------------------ | -------- |
+| `OPENAI_API_KEY` | Your OpenAI API key for GPT-4 access | Yes      |
 
 ## Dependencies
 

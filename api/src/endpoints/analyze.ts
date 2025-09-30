@@ -8,12 +8,8 @@ import {
   fetchRepository,
   transformRepository,
 } from "../../utils/repo";
-import {
-  AnalyzeRepoRequest,
-  AnalyzeRepoResponse,
-  AnalyzeRepoErrorResponse,
-} from "../types";
 import type { AppContext } from "../types";
+import { AnalyzeRepoRequest, AnalyzeRepoErrorResponse } from "../types";
 
 interface IssueManagementPayload {
   repository: {

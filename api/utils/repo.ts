@@ -6,7 +6,6 @@ import {
   RepositoryInfo,
   GitHubRepository,
 } from "../src/types";
-import { env } from "cloudflare:workers";
 
 export const parseRepoUrl = (
   repoUrl: string
