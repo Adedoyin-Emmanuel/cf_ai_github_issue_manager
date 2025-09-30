@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+
 import { IssueManagementPayload, ProcessedIssue } from "../types";
 
 export async function processIssues(payload: IssueManagementPayload, env: Env): Promise<ProcessedIssue[]> {

@@ -13,15 +13,15 @@ export interface Repository {
 }
 
 export interface Issue {
-	issue_number: number;
+	url: string;
+	body: string;
 	title: string;
 	state: string;
-	labels: string[];
 	author: string;
+	labels: string[];
 	created_at: string;
 	updated_at: string;
-	body: string;
-	url: string;
+	issue_number: number;
 }
 
 export interface ProcessedIssue {
