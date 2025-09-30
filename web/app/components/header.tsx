@@ -10,8 +10,9 @@ export const Header = ({ className }: HeaderProps) => {
   return (
     <div className={`${className} w-full py-3`}>
       <div className="mx-auto flex items-center justify-between p-3">
-        <h1 className="font-extrabold text-2xl">GitHub Issue Analyzer</h1>
-
+        <Link href={"/"}>
+          <h1 className="font-extrabold text-2xl">GitHub Issue Analyzer</h1>
+        </Link>
         <div className="flex gap-x-5">
           <Link
             href={
