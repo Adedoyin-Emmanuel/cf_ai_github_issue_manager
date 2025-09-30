@@ -8,8 +8,13 @@ import {
   fetchRepository,
   transformRepository,
 } from "../../utils/repo";
+import {
+  AnalyzeRepoRequest,
+  AnalyzeRepoErrorResponse,
+  IssueManagementResponse,
+} from "../types";
 import type { AppContext } from "../types";
-import { AnalyzeRepoRequest, AnalyzeRepoErrorResponse } from "../types";
+import { getCachedAnalysis, setCachedAnalysis } from "../utils/cache";
 
 interface IssueManagementPayload {
   repository: {
@@ -25,21 +30,6 @@ interface IssueManagementPayload {
     state: string;
     labels: string[];
     issue_number: number;
-  }>;
-}
-
-interface IssueManagementResponse {
-  success: boolean;
-  timestamp: string;
-  repository: IssueManagementPayload["repository"];
-  issues: Array<{
-    title: string;
-    reasoning: string;
-    duplicates: number[];
-    issue_number: number;
-    implementationOrder: number;
-    priority: "Critical" | "High" | "Medium" | "Low";
-    category: "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation";
   }>;
 }
 
@@ -100,6 +90,12 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
 
     const { owner, repo } = parsed;
 
+    const cachedResult = await getCachedAnalysis(c.env.REPO_CACHE, owner, repo);
+    if (cachedResult) {
+      console.log(`Cache hit for ${owner}/${repo}`);
+      return c.json(cachedResult);
+    }
+
     const [repositoryData, issuesData] = await Promise.all([
       fetchRepository(owner, repo),
       fetchIssues(owner, repo),
@@ -127,10 +123,12 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
 
     const aiResponse = await callAIWorker(aiPayload, c.env);
 
+    await setCachedAnalysis(c.env.REPO_CACHE, owner, repo, aiResponse, {
+      ttlHours: 24,
+    });
+
     return c.json(aiResponse);
   } catch (error) {
-    console.error("Error analyzing repository:", error);
-
     if (error instanceof Error && error.message.includes("timed out")) {
       const errorResponse: AnalyzeRepoErrorResponse = {
         error: "AI processing timeout",
@@ -139,6 +137,7 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
       };
       return c.json(errorResponse, 408);
     }
+
     if (axios.isAxiosError(error)) {
       const response = error.response;
 
@@ -172,6 +171,7 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
       error: "Internal server error",
       details: "Failed to analyze repository",
     };
+
     return c.json(errorResponse, 500);
   }
 }

@@ -81,3 +81,23 @@ export interface AnalyzeRepoErrorResponse {
   error: string;
   details?: string;
 }
+
+export interface IssueManagementResponse {
+  success: boolean;
+  timestamp: string;
+  repository: {
+    url: string;
+    name: string;
+    openIssues: number;
+    description: string;
+  };
+  issues: Array<{
+    title: string;
+    reasoning: string;
+    duplicates: number[];
+    issue_number: number;
+    implementationOrder: number;
+    priority: "Critical" | "High" | "Medium" | "Low";
+    category: "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation";
+  }>;
+}

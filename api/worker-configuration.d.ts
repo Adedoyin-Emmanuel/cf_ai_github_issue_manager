@@ -7,6 +7,7 @@ declare namespace Cloudflare {
   }
   interface Env {
     AI_WORKER: Fetcher;
+    REPO_CACHE: KVNamespace;
   }
 }
 interface Env extends Cloudflare.Env {}

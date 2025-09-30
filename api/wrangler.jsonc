@@ -44,5 +44,12 @@
       "binding": "AI_WORKER",
       "service": "ai"
     }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "REPO_CACHE",
+      "id": "b47af340113646e8b874ef834858ec37",
+      "preview_id": "e5a4fd8b48144623a5b1a2da1db74017"
+    }
   ]
 }
