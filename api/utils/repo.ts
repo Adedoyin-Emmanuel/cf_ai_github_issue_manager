@@ -1,0 +1,107 @@
+import axios, { AxiosResponse } from "axios";
+
+import {
+  IssueInfo,
+  GitHubIssue,
+  RepositoryInfo,
+  GitHubRepository,
+} from "../src/types";
+
+export const parseRepoUrl = (
+  repoUrl: string
+): { owner: string; repo: string } | null => {
+  try {
+    const url = new URL(repoUrl);
+
+    if (url.hostname !== "github.com") {
+      return null;
+    }
+
+    const pathParts = url.pathname.split("/").filter((part) => part.length > 0);
+
+    if (pathParts.length < 2) {
+      return null;
+    }
+
+    const [owner, repo] = pathParts;
+
+    const cleanRepo = repo.replace(/\.git$/, "");
+
+    return { owner, repo: cleanRepo };
+  } catch {
+    return null;
+  }
+};
+
+export const fetchRepository = async (
+  owner: string,
+  repo: string
+): Promise<GitHubRepository> => {
+  const response: AxiosResponse<GitHubRepository> = await axios.get(
+    `https://api.github.com/repos/${owner}/${repo}`,
+    {
+      headers: {
+        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "Cloudflare-Worker-API",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const fetchIssues = async (
+  owner: string,
+  repo: string
+): Promise<GitHubIssue[]> => {
+  const response: AxiosResponse<GitHubIssue[]> = await axios.get(
+    `https://api.github.com/repos/${owner}/${repo}/issues`,
+    {
+      headers: {
+        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "Cloudflare-Worker-API",
+      },
+      params: {
+        state: "open",
+        per_page: 50,
+        sort: "updated",
+        direction: "desc",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const transformRepository = (
+  githubRepo: GitHubRepository
+): RepositoryInfo => {
+  return {
+    name: githubRepo.name,
+    owner: githubRepo.owner.login,
+    description: githubRepo.description,
+    stars: githubRepo.stargazers_count,
+    forks: githubRepo.forks_count,
+    openIssues: githubRepo.open_issues_count,
+    url: githubRepo.html_url,
+  };
+};
+
+export const transformIssue = (githubIssue: GitHubIssue): IssueInfo => {
+  return {
+    issue_number: githubIssue.number,
+    title: githubIssue.title,
+    state: githubIssue.state,
+    labels: githubIssue.labels.map((label) => label.name),
+    author: githubIssue.user.login,
+    created_at: githubIssue.created_at,
+    updated_at: githubIssue.updated_at,
+    body: githubIssue.body ? githubIssue.body.substring(0, 200) : "",
+    url: githubIssue.html_url,
+  };
+};
+
+export const handleRateLimit = (response: AxiosResponse): boolean => {
+  const remaining = response.headers["x-ratelimit-remaining"];
+  return remaining === "0";
+};

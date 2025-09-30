@@ -65,3 +65,69 @@ export interface GraphQLResponse {
     }>;
   }>;
 }
+
+// GitHub Repository Analysis Types
+export interface AnalyzeRepoRequest {
+  repoUrl: string;
+}
+
+export interface GitHubRepository {
+  name: string;
+  full_name: string;
+  description: string | null;
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  html_url: string;
+  owner: {
+    login: string;
+  };
+}
+
+export interface GitHubIssue {
+  number: number;
+  title: string;
+  state: string;
+  labels: Array<{
+    name: string;
+  }>;
+  user: {
+    login: string;
+  };
+  created_at: string;
+  updated_at: string;
+  body: string | null;
+  html_url: string;
+}
+
+export interface RepositoryInfo {
+  name: string;
+  owner: string;
+  description: string | null;
+  stars: number;
+  forks: number;
+  openIssues: number;
+  url: string;
+}
+
+export interface IssueInfo {
+  issue_number: number;
+  title: string;
+  state: string;
+  labels: string[];
+  author: string;
+  created_at: string;
+  updated_at: string;
+  body: string;
+  url: string;
+}
+
+export interface AnalyzeRepoResponse {
+  repository: RepositoryInfo;
+  issues: IssueInfo[];
+}
+
+export interface AnalyzeRepoErrorResponse {
+  error: string;
+  details?: string;
+}
