@@ -61,8 +61,7 @@ export const fetchIssues = async (
       {
         headers: {
           Accept: "application/vnd.github.v3+json",
-          "User-Agent": "Adedoyin-Emmanuel-App",
-          Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+          "User-Agent": "Cloudflare-Worker-API",
         },
         params: {
           state: "open",

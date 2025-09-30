@@ -1,10 +1,18 @@
+import {
+	validatePayload,
+	createErrorResponse,
+	createSuccessResponse,
+} from "./utils/validation";
 import { processIssues } from "./utils/openai";
 import { IssueManagementPayload, IssueManagementResponse } from "./types";
 import { handleOptionsRequest, handleMethodNotAllowed } from "./utils/cors";
-import { validatePayload, createErrorResponse, createSuccessResponse } from "./utils/validation";
 
 export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+	async fetch(
+		request: Request,
+		env: Env,
+		ctx: ExecutionContext,
+	): Promise<Response> {
 		if (request.method === "OPTIONS") {
 			return handleOptionsRequest();
 		}
@@ -33,7 +41,8 @@ export default {
 
 			return createSuccessResponse(response);
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : "Internal server error";
+			const errorMessage =
+				error instanceof Error ? error.message : "Internal server error";
 			return createErrorResponse(errorMessage);
 		}
 	},

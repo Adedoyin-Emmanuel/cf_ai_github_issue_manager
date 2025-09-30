@@ -19,9 +19,6 @@ interface IssueManagementPayload {
   repository: {
     url: string;
     name: string;
-    stars: number;
-    forks: number;
-    owner: string;
     openIssues: number;
     description: string;
   };
@@ -30,10 +27,7 @@ interface IssueManagementPayload {
     body: string;
     title: string;
     state: string;
-    author: string;
     labels: string[];
-    created_at: string;
-    updated_at: string;
     issue_number: number;
   }>;
 }
@@ -122,9 +116,6 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
       repository: {
         url: repository.url,
         name: repository.name,
-        stars: repository.stars,
-        forks: repository.forks,
-        owner: repository.owner,
         openIssues: repository.openIssues,
         description: repository.description || "",
       },
@@ -133,24 +124,17 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
         body: issue.body,
         title: issue.title,
         state: issue.state,
-        author: issue.author,
         labels: issue.labels,
-        created_at: issue.created_at,
-        updated_at: issue.updated_at,
         issue_number: issue.issue_number,
       })),
     };
 
     const aiResponse = await callAIWorker(aiPayload, c.env);
 
-    const response: AnalyzeRepoResponse = {
-      issues,
-      repository,
-      aiAnalysis: aiResponse.issues,
-    };
-
-    return c.json(response);
+    return c.json(aiResponse);
   } catch (error) {
+    console.error("Error analyzing repository:", error);
+
     if (error instanceof Error && error.message.includes("timed out")) {
       const errorResponse: AnalyzeRepoErrorResponse = {
         error: "AI processing timeout",

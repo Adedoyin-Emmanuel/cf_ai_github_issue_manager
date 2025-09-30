@@ -1,6 +1,8 @@
 import { IssueManagementPayload, ErrorResponse } from "../types";
 
-export function validatePayload(payload: IssueManagementPayload): ErrorResponse | null {
+export function validatePayload(
+	payload: IssueManagementPayload,
+): ErrorResponse | null {
 	if (!payload.repository || !payload.issues) {
 		return {
 			success: false,
@@ -11,7 +13,10 @@ export function validatePayload(payload: IssueManagementPayload): ErrorResponse 
 	return null;
 }
 
-export function createErrorResponse(error: string, status: number = 500): Response {
+export function createErrorResponse(
+	error: string,
+	status: number = 500,
+): Response {
 	const errorResponse: ErrorResponse = {
 		success: false,
 		error,
