@@ -4,44 +4,67 @@
 
 Prompt used with AI (Cursor):
 
-"Build a Next.js frontend for my Cloudflare AI project with the following requirements:
+Build me a frontend with React, NextJs + Shadcnui components and TailwindCSS that looks very professional and minimal.
 
-1. State Management:
+Requirements:
 
-   - Use Zustand to store user API Token and Zone ID.
-   - Save these credentials to localStorage so they persist across sessions.
-   - Provide a hook to access and update this state anywhere in the app.
+1. When the user visits the page, they should see:
 
-2. Onboarding Modal:
+   - A centered container with a **stylish input field** where they can paste a GitHub repo URL (e.g., <https://github.com/owner/repo>).
+   - A clean "Analyze Issues" button.
 
-   - If no credentials are found in localStorage, show a modal asking for 'Cloudflare API Token' and 'Zone ID'.
-   - Use shadcn/ui Dialog for the modal.
-   - When submitted, save the credentials to Zustand + localStorage, and close the modal.
-   - Validate inputs are not empty.
+2. When they submit, show a **demo visualization** of the AI’s analysis (no backend integration for now, just mock data):
 
-3. Main Page:
+   - A **summary card** at the top: “Total Issues: 25, Duplicates Found: 3, Critical Bugs: 4.”
+   - Below that, a **grid/list of issues**. Each issue should be represented in a card with:
+     - Issue number + title (bold).
+     - Category (Bug, Feature, Enhancement).
+     - Priority (Critical, High, Medium, Low) → show with color badges.
+     - If duplicates exist → show linked issue numbers (chips or badges).
+     - A small expandable section (accordion) for “AI reasoning” explaining why it’s categorized or prioritized.
 
-   - After credentials are set, display a simple chat interface.
-   - Use Vercel's `ai-elements` for the chat UI.
-   - A text input at the bottom should let users type queries.
-   - Messages should show as a thread (user input and AI response).
-   - For now, mock the AI API call with a function that hits `/api/query`.
+3. The UI must feel **modern and visual**, not text-heavy:
 
-4. UI/UX:
+   - Use color-coded tags/badges for priority.
+   - Use icons for categories (🐞 bug, ✨ feature, ⚙️ enhancement).
+   - Use soft shadows, rounded corners, hover effects.
 
-   - Use shadcn/ui components for styling consistency (Button, Input, Card, etc.).
-   - Make sure it’s mobile responsive.
-   - Keep the design minimal, clean, and professional.
+4. Overall design guidelines:
+   - Centered, max-width container.
+   - Consistent padding, spacing, and typography.
+   - Neutral background (slate/gray) with white cards.
+   - Smooth transitions and hover states.
+   - Responsive for mobile and desktop.
 
-5. Code Quality:
-   - Follow Next.js + React best practices.
-   - TypeScript enabled, no `any` types.
-   - No placeholder or unnecessary comments in the code.
-   - Organize files in `/components`, `/hooks`, and `/app/api`.
+Mock Data Example (use this to populate the demo):
 
-Deliverables:
+```json
+[
+  {
+    "issue_number": 12,
+    "title": "Fix login timeout error",
+    "category": "Bug",
+    "priority": "Critical",
+    "duplicates": [18, 25],
+    "reasoning": "Frequent user reports, impacts core login functionality."
+  },
+  {
+    "issue_number": 22,
+    "title": "Add dark mode toggle",
+    "category": "Enhancement",
+    "priority": "Low",
+    "duplicates": [],
+    "reasoning": "Nice to have, no immediate user complaints."
+  },
+  {
+    "issue_number": 34,
+    "title": "Profile page crashes on image upload",
+    "category": "Bug",
+    "priority": "High",
+    "duplicates": [],
+    "reasoning": "Affects usability but not a system-wide blocker."
+  }
+]
+```
 
-- Zustand store in `/store/useCredentials.ts`.
-- Modal component in `/components/CredentialsModal.tsx`.
-- Chat interface in `/components/Chat.tsx`.
-- API route `/app/api/query/route.ts` (stubbed for now)."
+Make it look beautiful, consistent, and professional.
