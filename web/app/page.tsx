@@ -78,7 +78,7 @@ export default function Home() {
   })();
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Header />
 
@@ -99,17 +99,17 @@ export default function Home() {
             <SummaryCard
               isLoading={isLoading}
               totalIssues={totalIssues}
-              duplicatesFound={duplicatesFound}
               criticalBugs={criticalBugs}
+              duplicatesFound={duplicatesFound}
             />
 
             <IssuesList
+              repoInfo={repoInfo}
               isLoading={isLoading}
               sortedIssues={sortedIssues}
+              onAnalyzeAnother={handleAnalyzeAnother}
               sortByImplementation={sortByImplementation}
               setSortByImplementation={setSortByImplementation}
-              onAnalyzeAnother={handleAnalyzeAnother}
-              repoInfo={repoInfo}
             />
           </div>
         )}
