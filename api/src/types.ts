@@ -125,6 +125,15 @@ export interface IssueInfo {
 export interface AnalyzeRepoResponse {
   repository: RepositoryInfo;
   issues: IssueInfo[];
+  aiAnalysis?: Array<{
+    title: string;
+    reasoning: string;
+    duplicates: number[];
+    issue_number: number;
+    implementationOrder: number;
+    priority: "Critical" | "High" | "Medium" | "Low";
+    category: "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation";
+  }>;
 }
 
 export interface AnalyzeRepoErrorResponse {

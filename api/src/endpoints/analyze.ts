@@ -14,6 +14,78 @@ import {
   AnalyzeRepoErrorResponse,
 } from "../types";
 import type { AppContext } from "../types";
+// Define types locally to avoid cross-package imports
+interface IssueManagementPayload {
+  repository: {
+    url: string;
+    name: string;
+    stars: number;
+    forks: number;
+    owner: string;
+    openIssues: number;
+    description: string;
+  };
+  issues: Array<{
+    url: string;
+    body: string;
+    title: string;
+    state: string;
+    author: string;
+    labels: string[];
+    created_at: string;
+    updated_at: string;
+    issue_number: number;
+  }>;
+}
+
+interface IssueManagementResponse {
+  success: boolean;
+  timestamp: string;
+  repository: IssueManagementPayload["repository"];
+  issues: Array<{
+    title: string;
+    reasoning: string;
+    duplicates: number[];
+    issue_number: number;
+    implementationOrder: number;
+    priority: "Critical" | "High" | "Medium" | "Low";
+    category: "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation";
+  }>;
+}
+
+async function callAIWorker(
+  payload: IssueManagementPayload,
+  env: Env
+): Promise<IssueManagementResponse> {
+  // Use service binding instead of external HTTP request
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+
+  try {
+    const response = await env.AI_WORKER.fetch("https://ai-worker.internal/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`AI Worker responded with status: ${response.status}`);
+    }
+
+    return response.json() as Promise<IssueManagementResponse>;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("AI Worker request timed out after 25 seconds");
+    }
+    throw error;
+  }
+}
 
 export async function analyzeRepo(c: AppContext): Promise<Response> {
   try {
@@ -49,13 +121,49 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
     const repository = transformRepository(repositoryData);
     const issues = issuesData.map(transformIssue);
 
+    // Call AI worker to process the issues
+    const aiPayload: IssueManagementPayload = {
+      repository: {
+        url: repository.url,
+        name: repository.name,
+        stars: repository.stars,
+        forks: repository.forks,
+        owner: repository.owner,
+        openIssues: repository.openIssues,
+        description: repository.description || "",
+      },
+      issues: issues.map((issue) => ({
+        url: issue.url,
+        body: issue.body,
+        title: issue.title,
+        state: issue.state,
+        author: issue.author,
+        labels: issue.labels,
+        created_at: issue.created_at,
+        updated_at: issue.updated_at,
+        issue_number: issue.issue_number,
+      })),
+    };
+
+    const aiResponse = await callAIWorker(aiPayload, c.env);
+
     const response: AnalyzeRepoResponse = {
       repository,
       issues,
+      aiAnalysis: aiResponse.issues,
     };
 
     return c.json(response);
   } catch (error) {
+    // Handle AI worker timeout specifically
+    if (error instanceof Error && error.message.includes("timed out")) {
+      const errorResponse: AnalyzeRepoErrorResponse = {
+        error: "AI processing timeout",
+        details:
+          "The AI analysis is taking longer than expected. Please try again with a smaller repository or fewer issues.",
+      };
+      return c.json(errorResponse, 408);
+    }
     if (axios.isAxiosError(error)) {
       const response = error.response;
 

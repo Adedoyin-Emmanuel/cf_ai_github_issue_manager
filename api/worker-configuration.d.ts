@@ -6,7 +6,7 @@ declare namespace Cloudflare {
     mainModule: typeof import("./src");
   }
   interface Env {
-    CF_TOKEN: string;
+    AI_WORKER: Fetcher;
   }
 }
 interface Env extends Cloudflare.Env {}

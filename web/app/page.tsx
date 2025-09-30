@@ -27,6 +27,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Loader } from "@/components/ui/loader";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAnalyzeRepo } from "@/hooks/use-analyze-repo";
+import type { AIAnalysis } from "@/lib/api";
 
 // Mock data for demo
 const mockIssues = [
@@ -112,65 +116,26 @@ const getPriorityVariant = (priority: string) => {
 
 export default function Home() {
   const [repoUrl, setRepoUrl] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [sortByImplementation, setSortByImplementation] = useState(false);
-  const [processedIssues, setProcessedIssues] = useState<any[]>([]);
-  const [repository, setRepository] = useState<any>(null);
+
+  const analyzeRepoMutation = useAnalyzeRepo();
 
   const handleAnalyze = async () => {
     if (!repoUrl.trim()) return;
 
-    setIsAnalyzing(true);
     try {
-      // First, fetch repository and issues data from the API
-      const apiResponse = await fetch("/api/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ repoUrl }),
-      });
-
-      if (!apiResponse.ok) {
-        throw new Error(`API Error: ${apiResponse.status}`);
-      }
-
-      const repoData = await apiResponse.json();
-
-      // Then, send the data to the AI worker for processing
-      const aiWorkerUrl =
-        process.env.NEXT_PUBLIC_AI_WORKER_URL || "http://localhost:8788";
-      const aiResponse = await fetch(aiWorkerUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(repoData),
-      });
-
-      if (!aiResponse.ok) {
-        throw new Error(`AI Worker Error: ${aiResponse.status}`);
-      }
-
-      const processedData = await aiResponse.json();
-
-      // Store the processed data for display
-      setProcessedIssues(processedData.issues);
-      setRepository(processedData.repository);
-
-      setIsAnalyzing(false);
+      const result = await analyzeRepoMutation.mutateAsync(repoUrl);
       setShowResults(true);
     } catch (error) {
       console.error("Error analyzing repository:", error);
-      setIsAnalyzing(false);
-      // You might want to show an error message to the user here
+      // Error handling is done in the mutation
     }
   };
 
-  // Use processed data if available, otherwise fall back to mock data
-  const issuesToDisplay =
-    processedIssues.length > 0 ? processedIssues : mockIssues;
+  // Use API data if available, otherwise fall back to mock data
+  const issuesToDisplay = analyzeRepoMutation.data?.aiAnalysis || mockIssues;
+  const repository = analyzeRepoMutation.data?.repository;
 
   const totalIssues = issuesToDisplay.length;
   const duplicatesFound = issuesToDisplay.filter(
@@ -239,12 +204,12 @@ export default function Home() {
                 />
                 <Button
                   onClick={handleAnalyze}
-                  disabled={!repoUrl.trim() || isAnalyzing}
+                  disabled={!repoUrl.trim() || analyzeRepoMutation.isPending}
                   className="px-8"
                 >
-                  {isAnalyzing ? (
+                  {analyzeRepoMutation.isPending ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <Loader size={16} className="mr-2" />
                       Analyzing...
                     </>
                   ) : (
@@ -255,6 +220,15 @@ export default function Home() {
                   )}
                 </Button>
               </div>
+              {analyzeRepoMutation.isError && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-600 text-sm">
+                    Error:{" "}
+                    {analyzeRepoMutation.error?.message ||
+                      "Failed to analyze repository"}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -271,28 +245,42 @@ export default function Home() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-slate-50 rounded-lg">
-                    <div className="text-2xl font-bold text-slate-900">
-                      {totalIssues}
-                    </div>
-                    <div className="text-sm text-slate-600">Total Issues</div>
+                {analyzeRepoMutation.isPending ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="text-center p-4 bg-slate-50 rounded-lg"
+                      >
+                        <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                        <Skeleton className="h-4 w-24 mx-auto" />
+                      </div>
+                    ))}
                   </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl font-bold text-orange-600">
-                      {duplicatesFound}
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-slate-50 rounded-lg">
+                      <div className="text-2xl font-bold text-slate-900">
+                        {totalIssues}
+                      </div>
+                      <div className="text-sm text-slate-600">Total Issues</div>
                     </div>
-                    <div className="text-sm text-orange-600">
-                      Duplicates Found
+                    <div className="text-center p-4 bg-orange-50 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {duplicatesFound}
+                      </div>
+                      <div className="text-sm text-orange-600">
+                        Duplicates Found
+                      </div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600">
+                        {criticalBugs}
+                      </div>
+                      <div className="text-sm text-red-600">Critical Bugs</div>
                     </div>
                   </div>
-                  <div className="text-center p-4 bg-red-50 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">
-                      {criticalBugs}
-                    </div>
-                    <div className="text-sm text-red-600">Critical Bugs</div>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -331,94 +319,116 @@ export default function Home() {
                 </div>
               </div>
               <div className="grid gap-4">
-                {sortedIssues.map((issue, index) => (
-                  <Card
-                    key={issue.issue_number}
-                    className="shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            {sortByImplementation && (
-                              <div className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-semibold mr-2">
-                                {index + 1}
+                {analyzeRepoMutation.isPending
+                  ? // Skeleton loading for issues
+                    Array.from({ length: 3 }).map((_, index) => (
+                      <Card key={index} className="shadow-md">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Skeleton className="h-4 w-16" />
+                                <Skeleton className="h-4 w-48" />
                               </div>
-                            )}
-                            <a
-                              href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${issue.issue_number}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline"
-                            >
-                              #{issue.issue_number}
-                            </a>
-                            <a
-                              href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${issue.issue_number}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline"
-                            >
-                              {issue.title}
-                            </a>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Badge
-                              variant="outline"
-                              className="flex items-center gap-1"
-                            >
-                              {getCategoryIcon(issue.category)}
-                              {issue.category}
-                            </Badge>
-                            <Badge
-                              variant={
-                                getPriorityVariant(issue.priority) as any
-                              }
-                            >
-                              {issue.priority}
-                            </Badge>
-                            {issue.duplicates.length > 0 && (
-                              <div className="flex items-center gap-1">
-                                <span className="text-sm text-slate-600">
-                                  Duplicates:
-                                </span>
-                                {issue.duplicates.map((dup: number) => (
-                                  <a
-                                    key={dup}
-                                    href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${dup}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:opacity-80 transition-opacity"
-                                  >
-                                    <Badge
-                                      variant="secondary"
-                                      className="text-xs hover:bg-slate-200 transition-colors"
-                                    >
-                                      #{dup}
-                                    </Badge>
-                                  </a>
-                                ))}
+                              <div className="flex items-center gap-3">
+                                <Skeleton className="h-6 w-16" />
+                                <Skeleton className="h-6 w-20" />
                               </div>
-                            )}
+                            </div>
                           </div>
-                        </div>
-                      </div>
+                          <Skeleton className="h-4 w-full mb-2" />
+                          <Skeleton className="h-4 w-3/4" />
+                        </CardContent>
+                      </Card>
+                    ))
+                  : sortedIssues.map((issue, index) => (
+                      <Card
+                        key={issue.issue_number}
+                        className="shadow-md hover:shadow-lg transition-shadow"
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                {sortByImplementation && (
+                                  <div className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-semibold mr-2">
+                                    {index + 1}
+                                  </div>
+                                )}
+                                <a
+                                  href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${issue.issue_number}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline"
+                                >
+                                  #{issue.issue_number}
+                                </a>
+                                <a
+                                  href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${issue.issue_number}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline"
+                                >
+                                  {issue.title}
+                                </a>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge
+                                  variant="outline"
+                                  className="flex items-center gap-1"
+                                >
+                                  {getCategoryIcon(issue.category)}
+                                  {issue.category}
+                                </Badge>
+                                <Badge
+                                  variant={
+                                    getPriorityVariant(issue.priority) as any
+                                  }
+                                >
+                                  {issue.priority}
+                                </Badge>
+                                {issue.duplicates.length > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-sm text-slate-600">
+                                      Duplicates:
+                                    </span>
+                                    {issue.duplicates.map((dup: number) => (
+                                      <a
+                                        key={dup}
+                                        href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${dup}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="hover:opacity-80 transition-opacity"
+                                      >
+                                        <Badge
+                                          variant="secondary"
+                                          className="text-xs hover:bg-slate-200 transition-colors"
+                                        >
+                                          #{dup}
+                                        </Badge>
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
 
-                      <Accordion type="single" collapsible>
-                        <AccordionItem value="reasoning">
-                          <AccordionTrigger className="text-sm text-slate-600 hover:text-slate-900">
-                            View detailed analysis
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg">
-                              {issue.reasoning}
-                            </p>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
-                    </CardContent>
-                  </Card>
-                ))}
+                          <Accordion type="single" collapsible>
+                            <AccordionItem value="reasoning">
+                              <AccordionTrigger className="text-sm text-slate-600 hover:text-slate-900">
+                                View detailed analysis
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg">
+                                  {issue.reasoning}
+                                </p>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </CardContent>
+                      </Card>
+                    ))}
               </div>
             </div>
           </div>
