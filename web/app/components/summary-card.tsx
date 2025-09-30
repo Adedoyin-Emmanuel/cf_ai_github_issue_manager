@@ -1,5 +1,3 @@
-import { Search } from "lucide-react";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -19,10 +17,7 @@ export function SummaryCard({
   return (
     <Card className="shadow-none">
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Search className="h-5 w-5 mr-2" />
-          Analysis Summary
-        </CardTitle>
+        <CardTitle className="flex items-center">Analysis Summary</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
