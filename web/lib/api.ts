@@ -3,33 +3,18 @@ import axios from "axios";
 export interface RepositoryInfo {
   url: string;
   name: string;
-  forks: number;
-  owner: string;
-  stars: number;
   openIssues: number;
-  description: string | null;
-}
-
-export interface IssueInfo {
-  url: string;
-  body: string;
-  title: string;
-  state: string;
-  author: string;
-  labels: string[];
-  created_at: string;
-  updated_at: string;
-  issue_number: number;
+  description: string;
 }
 
 export interface AIAnalysis {
-  title: string;
-  reasoning: string;
-  duplicates: number[];
   issue_number: number;
-  implementationOrder: number;
-  priority: "Critical" | "High" | "Medium" | "Low";
+  title: string;
   category: "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation";
+  priority: "Critical" | "High" | "Medium" | "Low";
+  duplicates: number[];
+  reasoning: string;
+  implementationOrder: number;
 }
 
 export interface AnalyzeRepoRequest {
@@ -37,9 +22,10 @@ export interface AnalyzeRepoRequest {
 }
 
 export interface AnalyzeRepoResponse {
-  issues: IssueInfo[];
-  aiAnalysis?: AIAnalysis[];
+  success: boolean;
   repository: RepositoryInfo;
+  issues: AIAnalysis[];
+  timestamp: string;
 }
 
 export interface AnalyzeRepoErrorResponse {
