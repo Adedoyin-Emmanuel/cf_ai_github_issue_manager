@@ -6,6 +6,7 @@ import {
   RepositoryInfo,
   GitHubRepository,
 } from "../src/types";
+import { env } from "cloudflare:workers";
 
 export const parseRepoUrl = (
   repoUrl: string
@@ -54,23 +55,28 @@ export const fetchIssues = async (
   owner: string,
   repo: string
 ): Promise<GitHubIssue[]> => {
-  const response: AxiosResponse<GitHubIssue[]> = await axios.get(
-    `https://api.github.com/repos/${owner}/${repo}/issues`,
-    {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        "User-Agent": "Cloudflare-Worker-API",
-      },
-      params: {
-        state: "open",
-        per_page: 50,
-        sort: "updated",
-        direction: "desc",
-      },
-    }
-  );
+  try {
+    const response: AxiosResponse<GitHubIssue[]> = await axios.get(
+      `https://api.github.com/repos/${owner}/${repo}/issues`,
+      {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+          "User-Agent": "Adedoyin-Emmanuel-App",
+          Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+        },
+        params: {
+          state: "open",
+          per_page: 50,
+          sort: "updated",
+          direction: "desc",
+        },
+      }
+    );
 
-  return response.data;
+    return response.data.filter((issue) => !issue.pull_request);
+  } catch (error) {
+    return [];
+  }
 };
 
 export const transformRepository = (
@@ -78,26 +84,26 @@ export const transformRepository = (
 ): RepositoryInfo => {
   return {
     name: githubRepo.name,
-    owner: githubRepo.owner.login,
-    description: githubRepo.description,
-    stars: githubRepo.stargazers_count,
-    forks: githubRepo.forks_count,
-    openIssues: githubRepo.open_issues_count,
     url: githubRepo.html_url,
+    forks: githubRepo.forks_count,
+    owner: githubRepo.owner.login,
+    stars: githubRepo.stargazers_count,
+    description: githubRepo.description,
+    openIssues: githubRepo.open_issues_count,
   };
 };
 
 export const transformIssue = (githubIssue: GitHubIssue): IssueInfo => {
   return {
-    issue_number: githubIssue.number,
     title: githubIssue.title,
     state: githubIssue.state,
-    labels: githubIssue.labels.map((label) => label.name),
+    url: githubIssue.html_url,
     author: githubIssue.user.login,
+    issue_number: githubIssue.number,
     created_at: githubIssue.created_at,
     updated_at: githubIssue.updated_at,
-    body: githubIssue.body ? githubIssue.body.substring(0, 200) : "",
-    url: githubIssue.html_url,
+    labels: githubIssue.labels.map((label) => label.name),
+    body: githubIssue.body ? githubIssue.body.substring(0, 150) : "",
   };
 };
 

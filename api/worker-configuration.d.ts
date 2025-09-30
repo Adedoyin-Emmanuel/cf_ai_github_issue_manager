@@ -7,6 +7,7 @@ declare namespace Cloudflare {
   }
   interface Env {
     AI_WORKER: Fetcher;
+    GITHUB_TOKEN: string;
   }
 }
 interface Env extends Cloudflare.Env {}

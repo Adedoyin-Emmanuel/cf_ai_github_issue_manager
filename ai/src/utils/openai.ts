@@ -10,14 +10,16 @@ export async function processIssues(payload: IssueManagementPayload, env: Env): 
 
 		const { issues } = payload;
 
-		if (issues.length > 50) {
+		console.log(`Processing ${issues.length} issues`);
+
+		if (issues.length > 100) {
 			const limitedIssues = issues
 				.sort((a, b) => {
 					if (a.state === "open" && b.state !== "open") return -1;
 					if (a.state !== "open" && b.state === "open") return 1;
 					return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
 				})
-				.slice(0, 50);
+				.slice(0, 100);
 
 			const limitedPayload = { ...payload, issues: limitedIssues };
 			return await processIssuesInBatches(limitedPayload, openai);
@@ -34,36 +36,22 @@ export async function processIssues(payload: IssueManagementPayload, env: Env): 
 			messages: [
 				{
 					role: "system",
-					content: `You are an expert GitHub issue manager. Your task is to:
-1. Detect duplicate issues by analyzing titles, descriptions, and content
-2. Group related issues that address similar problems
-3. Categorize each issue by type (Bug, Feature, Enhancement, Chore, Documentation)
-4. Assign priority levels (Critical, High, Medium, Low) based on impact and urgency
-5. Provide reasoning for categorization and priority decisions
-6. Suggest implementation order for efficient development workflow
+					content: `You are an expert GitHub issue manager. Analyze issues and return JSON with:
+- category: Bug|Feature|Enhancement|Chore|Documentation
+- priority: Critical|High|Medium|Low
+- duplicates: [issue_numbers]
+- reasoning: brief explanation
+- implementationOrder: number
 
-Return your response as a valid JSON array of processed issues with the following structure:
-{
-  "issues": [
-    {
-      "issue_number": number,
-      "title": string,
-      "category": "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation",
-      "priority": "Critical" | "High" | "Medium" | "Low",
-      "duplicates": number[],
-      "reasoning": string,
-      "implementationOrder": number
-    }
-  ]
-}`,
+Return valid JSON array: {"issues": [{"issue_number": number, "title": string, "category": string, "priority": string, "duplicates": number[], "reasoning": string, "implementationOrder": number}]}`,
 				},
 				{
 					role: "user",
 					content: prompt,
 				},
 			],
-			max_tokens: 2000,
-			temperature: 0.3,
+			max_tokens: 1500, // Reduced for faster processing
+			temperature: 0.2, // Lower temperature for more consistent results
 		});
 
 		if (response && response.choices && response.choices[0] && response.choices[0].message) {
@@ -84,7 +72,7 @@ Return your response as a valid JSON array of processed issues with the followin
 
 async function processIssuesInBatches(payload: IssueManagementPayload, openai: OpenAI): Promise<ProcessedIssue[]> {
 	const { repository, issues } = payload;
-	const batchSize = 10;
+	const batchSize = 10; // Reduced batch size for better reliability
 
 	const batches: IssueManagementPayload[] = [];
 	for (let i = 0; i < issues.length; i += batchSize) {
@@ -97,130 +85,105 @@ async function processIssuesInBatches(payload: IssueManagementPayload, openai: O
 
 		const prompt = buildIssueManagementPrompt(batchPayload);
 
-		try {
-			const response = await openai.chat.completions.create({
-				model: "gpt-4",
-				messages: [
-					{
-						role: "system",
-						content: `You are an expert GitHub issue manager. Your task is to:
-1. Detect duplicate issues by analyzing titles, descriptions, and content
-2. Group related issues that address similar problems
-3. Categorize each issue by type (Bug, Feature, Enhancement, Chore, Documentation)
-4. Assign priority levels (Critical, High, Medium, Low) based on impact and urgency
-5. Provide reasoning for categorization and priority decisions
-6. Suggest implementation order for efficient development workflow
+		// Retry logic for failed batches
+		for (let attempt = 1; attempt <= 2; attempt++) {
+			try {
+				const response = await openai.chat.completions.create({
+					model: "gpt-4",
+					messages: [
+						{
+							role: "system",
+							content: `You are an expert GitHub issue manager. Analyze issues and return JSON with:
+- category: Bug|Feature|Enhancement|Chore|Documentation
+- priority: Critical|High|Medium|Low
+- duplicates: [issue_numbers]
+- reasoning: brief explanation
+- implementationOrder: number
 
-Return your response as a valid JSON array of processed issues with the following structure:
-{
-  "issues": [
-    {
-      "issue_number": number,
-      "title": string,
-      "category": "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation",
-      "priority": "Critical" | "High" | "Medium" | "Low",
-      "duplicates": number[],
-      "reasoning": string,
-      "implementationOrder": number
-    }
-  ]
-}`,
-					},
-					{
-						role: "user",
-						content: prompt,
-					},
-				],
-				max_tokens: 1000,
-				temperature: 0.3,
-			});
+Return valid JSON array: {"issues": [{"issue_number": number, "title": string, "category": string, "priority": string, "duplicates": number[], "reasoning": string, "implementationOrder": number}]}`,
+						},
+						{
+							role: "user",
+							content: prompt,
+						},
+					],
+					max_tokens: 600, // Further reduced for batch processing reliability
+					temperature: 0.2, // Lower temperature for consistency
+				});
 
-			if (response && response.choices && response.choices[0] && response.choices[0].message) {
-				const content = response.choices[0].message.content;
-				if (content) {
-					try {
-						const parsedResponse = JSON.parse(content);
-						return parsedResponse.issues || [];
-					} catch (parseError) {
-						return [];
+				if (response && response.choices && response.choices[0] && response.choices[0].message) {
+					const content = response.choices[0].message.content;
+					if (content) {
+						try {
+							const parsedResponse = JSON.parse(content);
+							console.log(`Batch ${index + 1} completed successfully with ${parsedResponse.issues?.length || 0} issues`);
+							return parsedResponse.issues || [];
+						} catch (parseError) {
+							console.error(`Batch ${index + 1} JSON parse error (attempt ${attempt}):`, parseError);
+							if (attempt === 2) return [];
+							continue;
+						}
 					}
 				}
+				console.warn(`Batch ${index + 1} returned empty response (attempt ${attempt})`);
+				if (attempt === 2) return [];
+			} catch (error) {
+				console.error(`Batch ${index + 1} failed (attempt ${attempt}):`, error);
+				if (attempt === 2) return [];
+				// Wait a bit before retry
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 			}
-			return [];
-		} catch (error) {
-			return [];
 		}
+		return [];
 	});
 
 	const timeoutPromise = new Promise<ProcessedIssue[]>((_, reject) => {
-		setTimeout(() => reject(new Error("Processing timeout - too many issues")), 60000);
+		setTimeout(() => reject(new Error("Processing timeout - too many issues")), 60000); // Increased timeout for reliability
 	});
 
-	const results = await Promise.race([Promise.all(batchPromises), timeoutPromise]);
+	try {
+		const results = await Promise.race([Promise.all(batchPromises), timeoutPromise]);
+		const allIssues = results.flat();
 
-	const allIssues = results.flat();
+		console.log(`Batch processing completed. Processed ${allIssues.length} issues from ${batches.length} batches`);
 
-	if (allIssues.length === 0) {
-		console.log("No issues processed successfully. This might be due to API rate limits or errors.");
-		throw new Error("Failed to process any issues. Please try again with a smaller repository or check API limits.");
+		if (allIssues.length === 0) {
+			console.log("No issues processed successfully. This might be due to API rate limits or errors.");
+			throw new Error("Failed to process any issues. Please try again with a smaller repository or check API limits.");
+		}
+
+		return allIssues;
+	} catch (error) {
+		console.error("Batch processing failed:", error);
+		throw error;
 	}
-
-	return allIssues;
 }
 
 function buildIssueManagementPrompt(payload: IssueManagementPayload): string {
 	const { repository, issues } = payload;
 
-	const prioritizedIssues = issues
-		.sort((a, b) => {
-			if (a.state === "open" && b.state !== "open") return -1;
-			if (a.state !== "open" && b.state === "open") return 1;
-			return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-		})
-		.slice(0, 20);
+	// Use all issues since we're already capped at 100
+	const prioritizedIssues = issues.sort((a, b) => {
+		if (a.state === "open" && b.state !== "open") return -1;
+		if (a.state !== "open" && b.state === "open") return 1;
+		return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+	});
 
-	let prompt = `Please process the following GitHub repository issues for management:
+	let prompt = `Repo: ${repository.name} (${repository.owner}) - ${repository.description || "No description"}
+Stats: ${repository.stars}⭐ ${repository.forks}🍴 ${repository.openIssues} issues
 
-REPOSITORY INFORMATION:
-- Name: ${repository.name}
-- Owner: ${repository.owner}
-- Description: ${repository.description}
-- Stars: ${repository.stars}
-- Forks: ${repository.forks}
-- Open Issues: ${repository.openIssues}
-- URL: ${repository.url}
-
-ISSUES TO PROCESS (${prioritizedIssues.length} of ${issues.length} total):
+Issues (${prioritizedIssues.length}):
 `;
 
 	prioritizedIssues.forEach((issue, index) => {
-		prompt += `
-${index + 1}. Issue #${issue.issue_number}: ${issue.title}
-   - State: ${issue.state}
-   - Author: ${issue.author}
-   - Created: ${issue.created_at}
-   - Labels: ${issue.labels.join(", ") || "None"}
-   - Body: ${issue.body.substring(0, 200)}${issue.body.length > 200 ? "..." : ""}
-   - URL: ${issue.url}
+		prompt += `${index + 1}. #${issue.issue_number}: ${issue.title}
+   Author: ${issue.author} | Labels: ${issue.labels.join(", ") || "None"}
+   Body: ${issue.body.substring(0, 80)}${issue.body.length > 80 ? "..." : ""}
 `;
 	});
 
 	prompt += `
-
-Please analyze these issues and return a JSON response with the following for each issue:
-1. **Category**: Classify as Bug, Feature, Enhancement, Chore, or Documentation
-2. **Priority**: Assign Critical, High, Medium, or Low based on impact and urgency
-3. **Duplicates**: List issue numbers that are duplicates or very similar
-4. **Reasoning**: Brief explanation for the categorization and priority
-5. **Implementation Order**: Suggested order for addressing (1 = highest priority)
-
-Focus on:
-- Detecting duplicate issues by analyzing titles and content
-- Grouping related issues that address similar problems
-- Prioritizing based on user impact, system stability, and business value
-- Considering the repository's context and description
-
-Return only valid JSON with the structure specified in the system message.`;
+Return JSON with category, priority, duplicates, reasoning, implementationOrder.`;
 
 	return prompt;
 }

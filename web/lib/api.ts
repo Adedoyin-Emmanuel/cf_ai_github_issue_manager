@@ -49,7 +49,6 @@ export interface AnalyzeRepoErrorResponse {
 
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787/v1",
-  timeout: 60000, // Increased to 60 seconds for AI processing
   headers: {
     "Content-Type": "application/json",
   },

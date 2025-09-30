@@ -14,7 +14,7 @@ import {
   AnalyzeRepoErrorResponse,
 } from "../types";
 import type { AppContext } from "../types";
-// Define types locally to avoid cross-package imports
+
 interface IssueManagementPayload {
   repository: {
     url: string;
@@ -57,10 +57,6 @@ async function callAIWorker(
   payload: IssueManagementPayload,
   env: Env
 ): Promise<IssueManagementResponse> {
-  // Use service binding instead of external HTTP request
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
-
   try {
     const response = await env.AI_WORKER.fetch("https://ai-worker.internal/", {
       method: "POST",
@@ -68,20 +64,21 @@ async function callAIWorker(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
-      signal: controller.signal,
     });
 
-    clearTimeout(timeoutId);
-
     if (!response.ok) {
-      throw new Error(`AI Worker responded with status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(
+        `AI Worker responded with status: ${response.status} - ${errorText}`
+      );
     }
 
-    return response.json() as Promise<IssueManagementResponse>;
+    const result = (await response.json()) as IssueManagementResponse;
+
+    return result;
   } catch (error) {
-    clearTimeout(timeoutId);
     if (error instanceof Error && error.name === "AbortError") {
-      throw new Error("AI Worker request timed out after 25 seconds");
+      throw new Error("AI Worker request timed out after 50 seconds");
     }
     throw error;
   }
@@ -121,7 +118,6 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
     const repository = transformRepository(repositoryData);
     const issues = issuesData.map(transformIssue);
 
-    // Call AI worker to process the issues
     const aiPayload: IssueManagementPayload = {
       repository: {
         url: repository.url,
@@ -148,14 +144,13 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
     const aiResponse = await callAIWorker(aiPayload, c.env);
 
     const response: AnalyzeRepoResponse = {
-      repository,
       issues,
+      repository,
       aiAnalysis: aiResponse.issues,
     };
 
     return c.json(response);
   } catch (error) {
-    // Handle AI worker timeout specifically
     if (error instanceof Error && error.message.includes("timed out")) {
       const errorResponse: AnalyzeRepoErrorResponse = {
         error: "AI processing timeout",

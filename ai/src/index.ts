@@ -15,6 +15,7 @@ export default {
 
 		try {
 			const payload: IssueManagementPayload = await request.json();
+
 			const validationError = validatePayload(payload);
 
 			if (validationError) {

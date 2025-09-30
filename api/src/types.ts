@@ -1,87 +1,22 @@
-import { DateTime, Str } from "chanfana";
 import type { Context } from "hono";
-import { z } from "zod";
 
 export type AppContext = Context<{ Bindings: Env }>;
 
-export const Task = z.object({
-  name: Str({ example: "lorem" }),
-  slug: Str(),
-  description: Str({ required: false }),
-  completed: z.boolean().default(false),
-  due_date: DateTime(),
-});
-
-// Firewall Logs API Types
-export interface LogsRequest {
-  apiToken: string;
-  zoneId: string;
-  queryParams?: {
-    datetime_geq?: string; // Greater than or equal to (matches Cloudflare docs)
-    datetime_leq?: string; // Less than or equal to (matches Cloudflare docs)
-    limit?: number;
-  };
-}
-
-export interface FirewallEventsAdaptiveFilter {
-  datetime_geq?: string;
-  datetime_leq?: string;
-}
-
-export interface FirewallEvent {
-  action: string;
-  clientAsn: string;
-  clientCountryName: string;
-  clientIP: string;
-  clientRequestPath: string;
-  clientRequestQuery: string;
-  datetime: string;
-  source: string;
-  userAgent: string;
-}
-
-export interface LogsResponse {
-  logs: FirewallEvent[];
-}
-
-export interface LogsErrorResponse {
-  error: string;
-  details?: unknown;
-}
-
-export interface GraphQLResponse {
-  data?: {
-    viewer: {
-      zones: Array<{
-        firewallEventsAdaptive: FirewallEvent[];
-      }>;
-    };
-  };
-  errors?: Array<{
-    message: string;
-    locations?: Array<{
-      line: number;
-      column: number;
-    }>;
-  }>;
-}
-
-// GitHub Repository Analysis Types
 export interface AnalyzeRepoRequest {
   repoUrl: string;
 }
 
 export interface GitHubRepository {
   name: string;
-  full_name: string;
-  description: string | null;
-  stargazers_count: number;
-  forks_count: number;
-  open_issues_count: number;
   html_url: string;
+  full_name: string;
+  forks_count: number;
+  stargazers_count: number;
+  description: string | null;
   owner: {
     login: string;
   };
+  open_issues_count: number;
 }
 
 export interface GitHubIssue {
@@ -98,6 +33,12 @@ export interface GitHubIssue {
   updated_at: string;
   body: string | null;
   html_url: string;
+  pull_request?: {
+    url: string;
+    html_url: string;
+    diff_url: string;
+    patch_url: string;
+  };
 }
 
 export interface RepositoryInfo {
