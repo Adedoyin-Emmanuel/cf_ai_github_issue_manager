@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Header } from "./components/Header";
+import { Header } from "./components/header";
 import { IssuesList } from "./components/issues-list";
 import { SummaryCard } from "./components/summary-card";
 import { api, type AnalyzeRepoResponse } from "@/lib/api";
