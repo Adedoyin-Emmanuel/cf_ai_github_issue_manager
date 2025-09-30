@@ -13,7 +13,8 @@ app.use(
       if (
         !origin ||
         origin.includes("localhost") ||
-        origin.includes("127.0.0.1")
+        origin.includes("127.0.0.1") ||
+        origin.includes("https://gh-issue-manager.adedoyine535.workers.dev")
       ) {
         return origin || "*";
       }
