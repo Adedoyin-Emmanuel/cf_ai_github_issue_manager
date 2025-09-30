@@ -1,9 +1,9 @@
 import type { IssueManagementResponse } from "../types";
 
 export interface CacheEntry {
-  data: IssueManagementResponse;
   timestamp: number;
   expiresAt: number;
+  data: IssueManagementResponse;
 }
 
 export interface CacheOptions {
