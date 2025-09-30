@@ -1,6 +1,6 @@
 # PROMPTS.md
 
-## Frontend Setup with Zustand, shadcn/ui, and Vercel AI Elements
+## Frontend Setup with Zustand, shadcn/ui
 
 Prompt used with AI (Cursor):
 
@@ -68,3 +68,68 @@ Mock Data Example (use this to populate the demo):
 ```
 
 Make it look beautiful, consistent, and professional.
+
+## Worker API Setup with Hono and Github API
+
+Build me a Cloudflare Worker API using Hono (TypeScript) that does the following:
+
+1. Exposes a POST endpoint `/analyze-repo`.
+
+   - Input body: { "repoUrl": "https://github.com/owner/repo" }
+
+2. From the `repoUrl`:
+
+   - Parse out the `owner` and `repo`.
+   - Use GitHub’s REST API to fetch:
+     - Repository metadata (name, description, stars, forks, open_issues_count, html_url).
+     - Issues (open issues only, limit to 50 for now).
+       For each issue, get:
+       - issue_number
+       - title
+       - state
+       - labels
+       - created_at
+       - updated_at
+       - body (first 200 chars only to keep payload small)
+       - author login
+       - html_url
+
+3. Return a JSON response shaped like this:
+
+```json
+{
+  "repository": {
+    "name": "repo-name",
+    "owner": "repo-owner",
+    "description": "repo description",
+    "stars": 123,
+    "forks": 45,
+    "openIssues": 20,
+    "url": "https://github.com/owner/repo"
+  },
+  "issues": [
+    {
+      "issue_number": 12,
+      "title": "Fix login timeout error",
+      "state": "open",
+      "labels": ["bug"],
+      "author": "johndoe",
+      "created_at": "2025-09-10T12:00:00Z",
+      "updated_at": "2025-09-20T12:00:00Z",
+      "body": "Shortened issue body...",
+      "url": "https://github.com/owner/repo/issues/12"
+    }
+  ]
+}
+```
+
+4. Implementation details:
+
+   - Use `fetch` to call GitHub API (`https://api.github.com/repos/{owner}/{repo}` and `/issues`).
+   - Handle GitHub API rate limits gracefully (check `x-ratelimit-remaining` header, return 429 if exhausted).
+   - Validate repo URL input; if invalid, return 400 with `{ error: "Invalid repo URL" }`.
+   - If repo not found, return 404.
+   - Wrap all responses in proper error handling.
+
+5. Use clean TypeScript with types/interfaces for repo + issues.
+6. Keep it minimal and production-ready for Cloudflare deployment.
