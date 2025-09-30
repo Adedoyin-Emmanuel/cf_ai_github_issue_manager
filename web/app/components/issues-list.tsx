@@ -1,9 +1,10 @@
 import { Search, ArrowUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { IssueCard } from "./issue-card";
 import type { AIAnalysis } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface IssuesListProps {
   isLoading: boolean;

@@ -1,11 +1,7 @@
 import { Github, ExternalLink } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import type { RepositoryInfo } from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface RepositoryInfoProps {
   repository: RepositoryInfo;

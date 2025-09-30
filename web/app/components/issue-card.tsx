@@ -1,8 +1,5 @@
 import { Bug, Sparkles, Settings } from "lucide-react";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
@@ -82,10 +79,7 @@ export function IssueCard({
               </a>
             </div>
             <div className="flex items-center gap-3">
-              <Badge
-                variant="outline"
-                className="flex items-center gap-1"
-              >
+              <Badge variant="outline" className="flex items-center gap-1">
                 {getCategoryIcon(issue.category)}
                 {issue.category}
               </Badge>
@@ -103,9 +97,7 @@ export function IssueCard({
               </Badge>
               {issue.duplicates.length > 0 && (
                 <div className="flex items-center gap-1">
-                  <span className="text-sm text-slate-600">
-                    Duplicates:
-                  </span>
+                  <span className="text-sm text-slate-600">Duplicates:</span>
                   {issue.duplicates.map((dup: number) => (
                     <a
                       key={dup}

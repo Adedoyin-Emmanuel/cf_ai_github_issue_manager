@@ -1,20 +1,21 @@
 "use client";
 
 import { useState } from "react";
+
+import { Header } from "./components/Header";
+import { IssuesList } from "./components/issues-list";
+import { SummaryCard } from "./components/summary-card";
 import { api, type AnalyzeRepoResponse } from "@/lib/api";
-import { Header } from "./components/header";
 import { InputSection } from "./components/input-section";
 import { RepositoryInfoCard } from "./components/repository-info";
-import { SummaryCard } from "./components/summary-card";
-import { IssuesList } from "./components/issues-list";
 
 export default function Home() {
   const [repoUrl, setRepoUrl] = useState("");
-  const [showResults, setShowResults] = useState(false);
-  const [sortByImplementation, setSortByImplementation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<AnalyzeRepoResponse | null>(null);
+  const [sortByImplementation, setSortByImplementation] = useState(false);
 
   const handleAnalyze = async () => {
     if (!repoUrl.trim()) return;

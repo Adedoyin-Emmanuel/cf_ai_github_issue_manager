@@ -1,24 +1,20 @@
 import { Search } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SummaryCardProps {
   isLoading: boolean;
   totalIssues: number;
-  duplicatesFound: number;
   criticalBugs: number;
+  duplicatesFound: number;
 }
 
 export function SummaryCard({
   isLoading,
   totalIssues,
-  duplicatesFound,
   criticalBugs,
+  duplicatesFound,
 }: SummaryCardProps) {
   return (
     <Card className="shadow-lg">
@@ -32,10 +28,7 @@ export function SummaryCard({
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="text-center p-4 bg-slate-50 rounded-lg"
-              >
+              <div key={i} className="text-center p-4 bg-slate-50 rounded-lg">
                 <Skeleton className="h-8 w-16 mx-auto mb-2" />
                 <Skeleton className="h-4 w-24 mx-auto" />
               </div>
@@ -53,9 +46,7 @@ export function SummaryCard({
               <div className="text-2xl font-bold text-orange-600">
                 {duplicatesFound}
               </div>
-              <div className="text-sm text-orange-600">
-                Duplicates Found
-              </div>
+              <div className="text-sm text-orange-600">Duplicates Found</div>
             </div>
             <div className="text-center p-4 bg-red-50 rounded-lg">
               <div className="text-2xl font-bold text-red-600">
