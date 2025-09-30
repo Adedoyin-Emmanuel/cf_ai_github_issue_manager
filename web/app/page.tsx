@@ -115,42 +115,91 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [sortByImplementation, setSortByImplementation] = useState(false);
+  const [processedIssues, setProcessedIssues] = useState<any[]>([]);
+  const [repository, setRepository] = useState<any>(null);
 
   const handleAnalyze = async () => {
     if (!repoUrl.trim()) return;
 
     setIsAnalyzing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsAnalyzing(false);
-    setShowResults(true);
+    try {
+      // First, fetch repository and issues data from the API
+      const apiResponse = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ repoUrl }),
+      });
+
+      if (!apiResponse.ok) {
+        throw new Error(`API Error: ${apiResponse.status}`);
+      }
+
+      const repoData = await apiResponse.json();
+
+      // Then, send the data to the AI worker for processing
+      const aiWorkerUrl =
+        process.env.NEXT_PUBLIC_AI_WORKER_URL || "http://localhost:8788";
+      const aiResponse = await fetch(aiWorkerUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(repoData),
+      });
+
+      if (!aiResponse.ok) {
+        throw new Error(`AI Worker Error: ${aiResponse.status}`);
+      }
+
+      const processedData = await aiResponse.json();
+
+      // Store the processed data for display
+      setProcessedIssues(processedData.issues);
+      setRepository(processedData.repository);
+
+      setIsAnalyzing(false);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error analyzing repository:", error);
+      setIsAnalyzing(false);
+      // You might want to show an error message to the user here
+    }
   };
 
-  const totalIssues = mockIssues.length;
-  const duplicatesFound = mockIssues.filter(
+  // Use processed data if available, otherwise fall back to mock data
+  const issuesToDisplay =
+    processedIssues.length > 0 ? processedIssues : mockIssues;
+
+  const totalIssues = issuesToDisplay.length;
+  const duplicatesFound = issuesToDisplay.filter(
     (issue) => issue.duplicates.length > 0
   ).length;
-  const criticalBugs = mockIssues.filter(
+  const criticalBugs = issuesToDisplay.filter(
     (issue) => issue.priority === "Critical"
   ).length;
 
   // Sort issues based on current sort preference
   const sortedIssues = sortByImplementation
-    ? [...mockIssues].sort(
+    ? [...issuesToDisplay].sort(
         (a, b) => a.implementationOrder - b.implementationOrder
       )
-    : mockIssues;
+    : issuesToDisplay;
 
-  // Extract repo info from URL for GitHub links
-  const getRepoInfo = (url: string) => {
-    const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-    if (match) {
-      return { owner: match[1], repo: match[2].replace(".git", "") };
-    }
-    return { owner: "owner", repo: "repo" }; // fallback for demo
-  };
-
-  const repoInfo = getRepoInfo(repoUrl);
+  // Use actual repository data if available, otherwise extract from URL
+  const repoInfo = repository
+    ? {
+        owner: repository.owner,
+        repo: repository.name,
+      }
+    : (() => {
+        const match = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+        if (match) {
+          return { owner: match[1], repo: match[2].replace(".git", "") };
+        }
+        return { owner: "owner", repo: "repo" }; // fallback for demo
+      })();
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -333,7 +382,7 @@ export default function Home() {
                                 <span className="text-sm text-slate-600">
                                   Duplicates:
                                 </span>
-                                {issue.duplicates.map((dup) => (
+                                {issue.duplicates.map((dup: number) => (
                                   <a
                                     key={dup}
                                     href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${dup}`}
