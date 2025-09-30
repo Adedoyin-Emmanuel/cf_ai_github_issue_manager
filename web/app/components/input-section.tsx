@@ -27,10 +27,10 @@ export function InputSection({
   setRepoUrl,
 }: InputSectionProps) {
   return (
-    <Card className="mb-8 shadow-lg">
+    <Card className="mb-8">
       <CardHeader>
-        <CardTitle className="text-center">Analyze Repository Issues</CardTitle>
-        <CardDescription className="text-center">
+        <CardTitle className="text-start">Analyze Repository Issues</CardTitle>
+        <CardDescription className="text-start">
           Paste a GitHub repository URL to get AI-powered issue analysis
         </CardDescription>
       </CardHeader>
@@ -46,7 +46,7 @@ export function InputSection({
           <Button
             onClick={onAnalyze}
             disabled={!repoUrl.trim() || isLoading}
-            className="px-8"
+            className="px-8 cursor-pointer"
           >
             {isLoading ? (
               <>
@@ -55,7 +55,7 @@ export function InputSection({
               </>
             ) : (
               <>
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="h-4 w-4 mr-2" strokeWidth={1.5} />
                 Analyze Issues
               </>
             )}

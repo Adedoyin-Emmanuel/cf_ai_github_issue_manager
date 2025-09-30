@@ -1,17 +1,19 @@
+import Link from "next/link";
 import { Bug, Sparkles, Settings } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import {
   Accordion,
-  AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  AccordionContent,
 } from "@/components/ui/accordion";
 import type { AIAnalysis } from "@/lib/api";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface IssueCardProps {
-  issue: AIAnalysis;
   index: number;
+  issue: AIAnalysis;
   sortByImplementation: boolean;
   repoInfo: { owner: string; repo: string };
 }
@@ -19,13 +21,13 @@ interface IssueCardProps {
 const getCategoryIcon = (category: string) => {
   switch (category) {
     case "Bug":
-      return <Bug className="h-4 w-4" />;
+      return <Bug className="h-4 w-4" strokeWidth={1.5} />;
     case "Feature":
-      return <Sparkles className="h-4 w-4" />;
+      return <Sparkles className="h-4 w-4" strokeWidth={1.5} />;
     case "Enhancement":
-      return <Settings className="h-4 w-4" />;
+      return <Settings className="h-4 w-4" strokeWidth={1.5} />;
     default:
-      return <Bug className="h-4 w-4" />;
+      return <Bug className="h-4 w-4" strokeWidth={1.5} />;
   }
 };
 
@@ -47,11 +49,11 @@ const getPriorityVariant = (priority: string) => {
 export function IssueCard({
   issue,
   index,
-  sortByImplementation,
   repoInfo,
+  sortByImplementation,
 }: IssueCardProps) {
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow">
+    <Card className="shadow-none">
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -61,22 +63,22 @@ export function IssueCard({
                   {index + 1}
                 </div>
               )}
-              <a
+              <Link
                 href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${issue.issue_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline"
               >
                 #{issue.issue_number}
-              </a>
-              <a
+              </Link>
+              <Link
                 href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${issue.issue_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline"
               >
                 {issue.title}
-              </a>
+              </Link>
             </div>
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="flex items-center gap-1">
@@ -99,7 +101,7 @@ export function IssueCard({
                 <div className="flex items-center gap-1">
                   <span className="text-sm text-slate-600">Duplicates:</span>
                   {issue.duplicates.map((dup: number) => (
-                    <a
+                    <Link
                       key={dup}
                       href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${dup}`}
                       target="_blank"
@@ -112,7 +114,7 @@ export function IssueCard({
                       >
                         #{dup}
                       </Badge>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               )}

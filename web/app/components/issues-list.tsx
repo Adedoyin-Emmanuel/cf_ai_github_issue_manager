@@ -9,19 +9,19 @@ import { Card, CardContent } from "@/components/ui/card";
 interface IssuesListProps {
   isLoading: boolean;
   sortedIssues: AIAnalysis[];
-  sortByImplementation: boolean;
-  setSortByImplementation: (value: boolean) => void;
   onAnalyzeAnother: () => void;
+  sortByImplementation: boolean;
   repoInfo: { owner: string; repo: string };
+  setSortByImplementation: (value: boolean) => void;
 }
 
 export function IssuesList({
+  repoInfo,
   isLoading,
   sortedIssues,
+  onAnalyzeAnother,
   sortByImplementation,
   setSortByImplementation,
-  onAnalyzeAnother,
-  repoInfo,
 }: IssuesListProps) {
   return (
     <div className="space-y-4">
@@ -34,9 +34,9 @@ export function IssuesList({
             variant="outline"
             size="sm"
             onClick={() => setSortByImplementation(!sortByImplementation)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
           >
-            <ArrowUpDown className="h-4 w-4" />
+            <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
             {sortByImplementation
               ? "View by Priority"
               : "View in Order of Implementation"}
@@ -45,9 +45,9 @@ export function IssuesList({
             variant="outline"
             size="sm"
             onClick={onAnalyzeAnother}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4 w-4" strokeWidth={1.5} />
             Analyze Another Repository
           </Button>
         </div>
@@ -55,7 +55,7 @@ export function IssuesList({
       <div className="grid gap-4">
         {isLoading
           ? Array.from({ length: 3 }).map((_, index) => (
-              <Card key={index} className="shadow-md">
+              <Card key={index} className="shadow-none">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">

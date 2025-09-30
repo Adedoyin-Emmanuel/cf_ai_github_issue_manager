@@ -1,17 +1,30 @@
-import { Github } from "lucide-react";
+import React from "react";
+import Link from "next/link";
+import { Github, Twitter } from "lucide-react";
 
-export function Header() {
+interface HeaderProps {
+  className?: string;
+}
+
+export const Header = ({ className }: HeaderProps) => {
   return (
-    <div className="text-center mb-12">
-      <div className="flex items-center justify-center mb-4">
-        <Github className="h-8 w-8 text-slate-600 mr-3" />
-        <h1 className="text-3xl font-bold text-slate-900">
-          GitHub Issue Analyzer
-        </h1>
+    <div className={`${className} w-full py-3`}>
+      <div className="mx-auto flex items-center justify-between p-3">
+        <h1 className="font-extrabold text-2xl">GitHub Issue Analyzer</h1>
+
+        <div className="flex gap-x-5">
+          <Link
+            href={
+              "https://github.com/Adedoyin-Emmanuel/cf_ai_github_issue_manager"
+            }
+          >
+            <Github className="w-5 h-5 cursor-pointer" strokeWidth={1.5} />
+          </Link>
+          <Link href={"https://x.com/Emmysoft_Tm"}>
+            <Twitter className="w-5 h-5 cursor-pointer" strokeWidth={1.5} />
+          </Link>
+        </div>
       </div>
-      <p className="text-slate-600 text-lg">
-        AI-powered analysis of GitHub repository issues
-      </p>
     </div>
   );
-}
+};

@@ -9,7 +9,7 @@ interface RepositoryInfoProps {
 
 export function RepositoryInfoCard({ repository }: RepositoryInfoProps) {
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-none">
       <CardHeader>
         <CardTitle className="flex items-center">
           <Github className="h-5 w-5 mr-2" />
