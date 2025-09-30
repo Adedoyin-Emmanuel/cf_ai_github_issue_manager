@@ -42,13 +42,21 @@ const apiClient = axios.create({
 
 export const api = {
   analyzeRepo: async (repoUrl: string): Promise<AnalyzeRepoResponse> => {
-    const response = await apiClient.post<AnalyzeRepoResponse>(
-      "/analyze-repo",
-      {
-        repoUrl,
+    try {
+      const response = await apiClient.post<AnalyzeRepoResponse>(
+        "/analyze-repo",
+        {
+          repoUrl,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data) {
+        const errorData = error.response.data as AnalyzeRepoErrorResponse;
+        throw new Error(errorData.details || errorData.error);
       }
-    );
-    return response.data;
+      throw error;
+    }
   },
 };
 

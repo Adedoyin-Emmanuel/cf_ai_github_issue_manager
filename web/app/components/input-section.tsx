@@ -35,7 +35,7 @@ export function InputSection({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <Input
             placeholder="https://github.com/owner/repo"
             value={repoUrl}
@@ -46,7 +46,7 @@ export function InputSection({
           <Button
             onClick={onAnalyze}
             disabled={!repoUrl.trim() || isLoading}
-            className="px-8 cursor-pointer"
+            className="px-8 cursor-pointer w-full sm:w-auto"
           >
             {isLoading ? (
               <>
