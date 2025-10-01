@@ -13,7 +13,8 @@
 # testing
 /coverage
 
-.open-next
+# .open-next - commented out for Cloudflare Pages deployment
+# .open-next
 
 # next.js
 /.next/
