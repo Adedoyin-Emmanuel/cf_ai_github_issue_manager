@@ -129,6 +129,7 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
 
     return c.json(aiResponse);
   } catch (error) {
+    console.log(error);
     if (error instanceof Error && error.message.includes("timed out")) {
       const errorResponse: AnalyzeRepoErrorResponse = {
         error: "AI processing timeout",
@@ -169,7 +170,7 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
 
     const errorResponse: AnalyzeRepoErrorResponse = {
       error: "Internal server error",
-      details: "Failed to analyze repository",
+      details: error instanceof Error ? error.message : "Failed to analyze repository",
     };
 
     return c.json(errorResponse, 500);
