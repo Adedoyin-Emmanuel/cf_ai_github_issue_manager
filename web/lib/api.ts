@@ -23,9 +23,9 @@ export interface AnalyzeRepoRequest {
 
 export interface AnalyzeRepoResponse {
   success: boolean;
-  repository: RepositoryInfo;
-  issues: AIAnalysis[];
   timestamp: string;
+  issues: AIAnalysis[];
+  repository: RepositoryInfo;
 }
 
 export interface AnalyzeRepoErrorResponse {
@@ -55,6 +55,7 @@ export const api = {
         const errorData = error.response.data as AnalyzeRepoErrorResponse;
         throw new Error(errorData.details || errorData.error);
       }
+
       throw error;
     }
   },
