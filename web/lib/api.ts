@@ -8,13 +8,13 @@ export interface RepositoryInfo {
 }
 
 export interface AIAnalysis {
-  issue_number: number;
   title: string;
-  category: "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation";
-  priority: "Critical" | "High" | "Medium" | "Low";
-  duplicates: number[];
   reasoning: string;
+  duplicates: number[];
+  issue_number: number;
   implementationOrder: number;
+  priority: "Critical" | "High" | "Medium" | "Low";
+  category: "Bug" | "Feature" | "Enhancement" | "Chore" | "Documentation";
 }
 
 export interface AnalyzeRepoRequest {
@@ -34,7 +34,7 @@ export interface AnalyzeRepoErrorResponse {
 }
 
 const apiClient = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/v1`,
+  baseURL: `https://gh-issue-manager-api.adedoyine535.workers.dev/v1`,
   headers: {
     "Content-Type": "application/json",
   },
