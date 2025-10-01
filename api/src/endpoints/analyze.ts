@@ -38,7 +38,7 @@ async function callAIWorker(
   env: Env
 ): Promise<IssueManagementResponse> {
   try {
-    const response = await env.AI_WORKER.fetch("https://ai-worker.internal/", {
+    const response = await env.AI_WORKER.fetch("/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
