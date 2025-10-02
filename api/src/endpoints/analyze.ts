@@ -38,7 +38,6 @@ async function callAIWorker(
   env: Env
 ): Promise<IssueManagementResponse> {
   try {
-    // Service bindings require a Request with an absolute URL in production
     const request = new Request("https://ai.internal/", {
       method: "POST",
       headers: {
@@ -99,11 +98,9 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
       return c.json(cachedResult);
     }
 
-    const githubToken = c.env.GITHUB_TOKEN;
-
     const [repositoryData, issuesData] = await Promise.all([
-      fetchRepository(owner, repo, githubToken),
-      fetchIssues(owner, repo, githubToken),
+      fetchRepository(owner, repo),
+      fetchIssues(owner, repo),
     ]);
 
     const repository = transformRepository(repositoryData);
@@ -125,6 +122,8 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
         issue_number: issue.issue_number,
       })),
     };
+
+    console.log(`AI Payload: ${JSON.stringify(aiPayload)}`);
 
     const aiResponse = await callAIWorker(aiPayload, c.env);
 
@@ -165,10 +164,13 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
           return c.json(errorResponse, 404);
         }
 
+        console.log(error);
+
         const errorResponse: AnalyzeRepoErrorResponse = {
           error: "GitHub API error",
-          details: `HTTP ${response.status}: ${response.statusText}`,
+          details: error.message,
         };
+
         return c.json(errorResponse, response.status as any);
       }
     }

@@ -24,6 +24,8 @@ export default {
 		try {
 			const payload: IssueManagementPayload = await request.json();
 
+			console.log(`Payload: ${JSON.stringify(payload)}`);
+
 			const validationError = validatePayload(payload);
 
 			if (validationError) {

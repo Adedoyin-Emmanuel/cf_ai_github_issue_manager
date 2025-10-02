@@ -34,7 +34,7 @@ export interface AnalyzeRepoErrorResponse {
 }
 
 const apiClient = axios.create({
-  baseURL: `https://gh-issue-manager-api.adedoyine535.workers.dev/v1`,
+  baseURL: `http://localhost:8787/v1`,
   headers: {
     "Content-Type": "application/json",
   },

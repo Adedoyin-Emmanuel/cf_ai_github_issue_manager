@@ -35,11 +35,15 @@ export const parseRepoUrl = (
 
 export const fetchRepository = async (
   owner: string,
-  repo: string,
-  authToken?: string
+  repo: string
 ): Promise<GitHubRepository> => {
   const response: AxiosResponse<GitHubRepository> = await axios.get(
-    `https://api.github.com/repos/${owner}/${repo}`
+    `https://api.github.com/repos/${owner}/${repo}`,
+    {
+      headers: {
+        "User-Agent": "Cloudflare-Worker-API",
+      },
+    }
   );
 
   return response.data;
@@ -47,13 +51,16 @@ export const fetchRepository = async (
 
 export const fetchIssues = async (
   owner: string,
-  repo: string,
-  authToken?: string
+  repo: string
 ): Promise<GitHubIssue[]> => {
   try {
     const response: AxiosResponse<GitHubIssue[]> = await axios.get(
       `https://api.github.com/repos/${owner}/${repo}/issues`,
+
       {
+        headers: {
+          "User-Agent": "Cloudflare-Worker-API",
+        },
         params: {
           state: "open",
           per_page: 50,
