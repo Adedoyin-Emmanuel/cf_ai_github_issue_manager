@@ -30,6 +30,8 @@ export default {
 				return createErrorResponse(validationError.error, 400);
 			}
 
+			console.log(`Open AI API key: ${env.OPENAI_API_KEY}`);
+
 			const processedIssues = await processIssues(payload, env);
 
 			const response: IssueManagementResponse = {
