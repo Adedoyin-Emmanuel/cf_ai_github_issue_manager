@@ -8,6 +8,7 @@ declare namespace Cloudflare {
   interface Env {
     AI_WORKER: Fetcher;
     REPO_CACHE: KVNamespace;
+    GITHUB_TOKEN: string;
   }
 }
 interface Env extends Cloudflare.Env {}
@@ -8815,7 +8816,9 @@ declare namespace Cloudflare {
   // will merge all declarations.
   //
   // You can use `wrangler types` to generate the `Env` type automatically.
-  interface Env {}
+  interface Env {
+    GITHUB_TOKEN: string;
+  }
   // Project-specific parameters used to inform types.
   //
   // This interface is, again, intended to be declared in project-specific files, and then that

@@ -99,9 +99,11 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
       return c.json(cachedResult);
     }
 
+    const githubToken = c.env.GITHUB_TOKEN;
+
     const [repositoryData, issuesData] = await Promise.all([
-      fetchRepository(owner, repo),
-      fetchIssues(owner, repo),
+      fetchRepository(owner, repo, githubToken),
+      fetchIssues(owner, repo, githubToken),
     ]);
 
     const repository = transformRepository(repositoryData);

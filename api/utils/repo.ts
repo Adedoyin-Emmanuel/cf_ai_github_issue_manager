@@ -35,14 +35,15 @@ export const parseRepoUrl = (
 
 export const fetchRepository = async (
   owner: string,
-  repo: string
+  repo: string,
+  authToken?: string
 ): Promise<GitHubRepository> => {
   const response: AxiosResponse<GitHubRepository> = await axios.get(
     `https://api.github.com/repos/${owner}/${repo}`,
     {
       headers: {
         Accept: "application/vnd.github.v3+json",
-        "User-Agent": "Cloudflare-Worker-API",
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       },
     }
   );
@@ -52,7 +53,8 @@ export const fetchRepository = async (
 
 export const fetchIssues = async (
   owner: string,
-  repo: string
+  repo: string,
+  authToken?: string
 ): Promise<GitHubIssue[]> => {
   try {
     const response: AxiosResponse<GitHubIssue[]> = await axios.get(
@@ -61,6 +63,7 @@ export const fetchIssues = async (
         headers: {
           Accept: "application/vnd.github.v3+json",
           "User-Agent": "Cloudflare-Worker-API",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         },
         params: {
           state: "open",
