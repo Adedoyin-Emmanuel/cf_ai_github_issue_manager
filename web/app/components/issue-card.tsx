@@ -57,7 +57,7 @@ export function IssueCard({
       <CardContent className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mb-2">
               {sortByImplementation && (
                 <div className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs font-semibold mr-2">
                   {index + 1}
@@ -67,9 +67,9 @@ export function IssueCard({
                 href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${issue.issue_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline"
+                className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline mt-2 mb-1"
               >
-                #{issue.issue_number}
+                {issue.title}
               </Link>
               <Link
                 href={`https://github.com/${repoInfo.owner}/${repoInfo.repo}/issues/${issue.issue_number}`}
@@ -77,7 +77,7 @@ export function IssueCard({
                 rel="noopener noreferrer"
                 className="font-semibold text-slate-900 hover:text-blue-600 transition-colors underline hover:no-underline"
               >
-                {issue.title}
+                #{issue.issue_number}
               </Link>
             </div>
             <div className="flex items-center gap-3">

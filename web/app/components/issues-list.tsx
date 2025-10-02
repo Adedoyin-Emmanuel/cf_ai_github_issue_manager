@@ -25,16 +25,16 @@ export function IssuesList({
 }: IssuesListProps) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-slate-900">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-semibold text-slate-900 text-center sm:text-left w-full">
           Issues Analysis
         </h2>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setSortByImplementation(!sortByImplementation)}
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center"
           >
             <ArrowUpDown className="h-4 w-4" strokeWidth={1.5} />
             {sortByImplementation
@@ -45,7 +45,7 @@ export function IssuesList({
             variant="outline"
             size="sm"
             onClick={onAnalyzeAnother}
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center"
           >
             <Search className="h-4 w-4" strokeWidth={1.5} />
             Analyze Another Repository
