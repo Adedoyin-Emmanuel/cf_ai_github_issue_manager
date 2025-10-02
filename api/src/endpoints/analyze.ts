@@ -38,13 +38,16 @@ async function callAIWorker(
   env: Env
 ): Promise<IssueManagementResponse> {
   try {
-    const response = await env.AI_WORKER.fetch("/", {
+    // Service bindings require a Request with an absolute URL in production
+    const request = new Request("https://ai.internal/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
     });
+
+    const response = await env.AI_WORKER.fetch(request);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -170,7 +173,8 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
 
     const errorResponse: AnalyzeRepoErrorResponse = {
       error: "Internal server error",
-      details: error instanceof Error ? error.message : "Failed to analyze repository",
+      details:
+        error instanceof Error ? error.message : "Failed to analyze repository",
     };
 
     return c.json(errorResponse, 500);
