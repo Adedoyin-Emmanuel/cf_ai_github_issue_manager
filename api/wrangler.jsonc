@@ -42,7 +42,7 @@
   "services": [
     {
       "binding": "AI_WORKER",
-      "service": "ai"
+      "service": "ai-worker"
     }
   ],
   "kv_namespaces": [
