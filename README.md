@@ -43,7 +43,7 @@ This is my `Cloudflare Assignment` for the [Cloudflare 2026 Internship](https://
 
 ## Live Demo
 
-**Try it out:** [Deployed Application](https://your-deployed-app.com)
+**Try it out:** [Deployed Application](https://gh-issue-manager.adedoyine535.workers.dev/)
 
 ## Assignment Compliance
 
@@ -51,10 +51,10 @@ This project fulfills all requirements for the **Cloudflare AI Application Assig
 
 ### Required Components
 
-- **🤖 LLM Integration**: Uses OpenAI GPT-4o-mini for intelligent issue analysis and categorization
-- **⚡ Workflow/Coordination**: Multi-worker architecture with service bindings and KV storage
-- **💬 User Input Interface**: Professional Next.js web application with real-time interaction
-- **🧠 Memory/State**: KV caching system with 24-hour TTL and persistent frontend state
+- **LLM Integration**: Uses OpenAI GPT-4o-mini for intelligent issue analysis and categorization
+- **Workflow/Coordination**: Multi-worker architecture with service bindings and KV storage
+- **User Input Interface**: Professional Next.js web application with real-time interaction
+- **Memory/State**: KV caching system with 24-hour TTL and persistent frontend state
 
 ### Assignment Requirements
 
@@ -83,6 +83,7 @@ graph TB
    - shadcn/ui components with Tailwind CSS
    - Real-time loading states and error handling
    - Responsive design for all devices
+   - Deployed on Cloudflare pages
 
 2. **API Worker** (`/api/`)
 
@@ -90,12 +91,14 @@ graph TB
    - GitHub API integration with rate limiting
    - Service binding to AI worker
    - KV storage for intelligent caching
+   - Deployed on Cloudflare workers
 
 3. **AI Worker** (`/ai/`)
    - OpenAI GPT-4o-mini integration
    - Intelligent issue categorization and prioritization
    - Duplicate detection algorithms
    - Implementation order suggestions
+   - Deoloyed on Cloudflare workers
 
 ## Key Features
 
@@ -321,7 +324,6 @@ For questions or support:
 
 - Open an issue on GitHub
 - Check the [PROMPTS.md](PROMPTS.md) for development context
-- Review the [SETUP.md](SETUP.md) for detailed configuration
 
 ---
 
