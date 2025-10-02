@@ -24,6 +24,9 @@ export async function processIssues(
 	payload: IssueManagementPayload,
 	env: Env,
 ): Promise<ProcessedIssue[]> {
+	if (!env.OPENAI_API_KEY || env.OPENAI_API_KEY.startsWith("invalid")) {
+		throw new Error("Failed to generate analysis: invalid API key");
+	}
 	const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 	const { issues: rawIssues } = payload;
 
