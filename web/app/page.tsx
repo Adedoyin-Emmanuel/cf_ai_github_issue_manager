@@ -28,7 +28,6 @@ export default function Home() {
       setData(result);
       setShowResults(true);
     } catch (error) {
-      console.error("Error analyzing repository:", error);
       setError(
         error instanceof Error ? error.message : "Failed to analyze repository"
       );

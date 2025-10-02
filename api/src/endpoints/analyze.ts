@@ -94,7 +94,6 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
 
     const cachedResult = await getCachedAnalysis(c.env.REPO_CACHE, owner, repo);
     if (cachedResult) {
-      console.log(`Cache hit for ${owner}/${repo}`);
       return c.json(cachedResult);
     }
 
@@ -123,8 +122,6 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
       })),
     };
 
-    console.log(`AI Payload: ${JSON.stringify(aiPayload)}`);
-
     const aiResponse = await callAIWorker(aiPayload, c.env);
 
     await setCachedAnalysis(c.env.REPO_CACHE, owner, repo, aiResponse, {
@@ -133,7 +130,6 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
 
     return c.json(aiResponse);
   } catch (error) {
-    console.log(error);
     if (error instanceof Error && error.message.includes("timed out")) {
       const errorResponse: AnalyzeRepoErrorResponse = {
         error: "AI processing timeout",
@@ -163,8 +159,6 @@ export async function analyzeRepo(c: AppContext): Promise<Response> {
           };
           return c.json(errorResponse, 404);
         }
-
-        console.log(error);
 
         const errorResponse: AnalyzeRepoErrorResponse = {
           error: "GitHub API error",

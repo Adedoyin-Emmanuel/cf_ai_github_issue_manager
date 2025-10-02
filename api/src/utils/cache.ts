@@ -38,7 +38,6 @@ export async function getCachedAnalysis(
 
     return cached.data;
   } catch (error) {
-    console.error("Error reading from cache:", error);
     return null;
   }
 }
@@ -66,6 +65,6 @@ export async function setCachedAnalysis(
       expirationTtl: ttlHours * 60 * 60,
     });
   } catch (error) {
-    console.error("Error writing to cache:", error);
+    // pass
   }
 }

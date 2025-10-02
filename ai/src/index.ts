@@ -24,15 +24,11 @@ export default {
 		try {
 			const payload: IssueManagementPayload = await request.json();
 
-			console.log(`Payload: ${JSON.stringify(payload)}`);
-
 			const validationError = validatePayload(payload);
 
 			if (validationError) {
 				return createErrorResponse(validationError.error, 400);
 			}
-
-			console.log(`Open AI API key: ${env.OPENAI_API_KEY}`);
 
 			const processedIssues = await processIssues(payload, env);
 

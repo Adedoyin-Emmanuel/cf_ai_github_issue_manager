@@ -81,7 +81,6 @@ export async function processIssues(
 						LLM_TIMEOUT_MS,
 					);
 				} catch (e) {
-					console.error(`LLM batch ${i} failed:`, e);
 					return { issues: [] as any[] };
 				}
 			}),

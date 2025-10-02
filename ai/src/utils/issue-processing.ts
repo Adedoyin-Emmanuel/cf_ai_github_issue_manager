@@ -205,7 +205,6 @@ export function safeJsonExtract(content: string) {
 	try {
 		return JSON.parse(candidate);
 	} catch (e) {
-		console.error("safeJsonExtract parse failed:", e);
 		return null;
 	}
 }
