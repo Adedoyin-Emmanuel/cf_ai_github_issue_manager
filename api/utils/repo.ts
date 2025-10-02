@@ -43,7 +43,6 @@ export const fetchRepository = async (
     {
       headers: {
         Accept: "application/vnd.github.v3+json",
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       },
     }
   );
